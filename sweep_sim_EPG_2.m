@@ -23,7 +23,7 @@ function [dat, tissue, RF, motion] = sweep_sim_EPG_2(tissue, RF, motion)
 %
 
 %% Hidden options - shouldnt need to be changed in most cases
-tissue_multiplier = 1; % resolution of tissue vector
+% tissue_multiplier = 5; % resolution of tissue vector
 RF.range = 10; % +/-mm to simulate rf pulse over (i.e. extend of sidebands to include)
 
 offload = 1; % offload to remote machine if set up
@@ -50,23 +50,30 @@ RF.sweepdur = RF.npulses.*RF.TR*0.001; % sweep duration in seconds
 %% calculate motion vectorss
 motion_resp = sin(linspace(0,2*pi*RF.sweepdur*(motion.respfreq),RF.npulses)).*(motion.respmag./2);
 
-%% define tissue
-tissue.min = min([0,-max(motion_resp)]);
-tissue.length = (RF.range*1e-3) + tissue.min + ((RF.thk + RF.slicegap) * RF.nslice) + (RF.pulseshift.*RF.npulses);
-tissue.vec = linspace(tissue.min,tissue.length,RF.npulses.*tissue_multiplier);
-
 %% Introduce flow component
 motion.flow_per_pulse = 0;
-if ~motion.flow==0
-    tissue.vec_short = tissue.vec;
+if ~motion.flow==0   
     motion.flow_per_pulse = (motion.flow * RF.sweepdur) / RF.npulses; % displacement per pulse from flow
     motion.flow_dist = motion.flow_per_pulse .* RF.npulses;
-    
-    % extend tissue.vec to include flowing spins
-    tissue.vec_short = tissue.vec;
-    tissue.vec = linspace(0,tissue.length+motion.flow_dist,RF.npulses.*tissue_multiplier.*(motion.flow_dist/tissue.length));
-    tissue.vec_long = tissue.vec; % store this for later
 end
+
+%% define tissue
+tissue.min = min([0,-max(motion_resp),(motion.flow_per_pulse.*RF.npulses)]);
+tissue.max = max([max(motion_resp),(motion.flow_per_pulse.*RF.npulses)]);
+tissue.length = (RF.range*1e-3) + tissue.min + ((RF.thk + RF.slicegap) * RF.nslice) + (RF.pulseshift.*RF.npulses) + (abs(motion.flow_per_pulse).*RF.npulses);
+tissue_resolution = (tissue.length*1e3) * 100; % 100 elements per mm
+tissue.vec = linspace(tissue.min,tissue.length,tissue_resolution);
+
+%% Introduce flow component
+% motion.flow_per_pulse = 0;
+% if ~motion.flow==0
+
+    % extend tissue.vec to include flowing spins
+%     tissue.vec_short = tissue.vec;
+%     tissue.vec_short = tissue.vec;
+%     tissue.vec = linspace(0,tissue.length+motion.flow_dist,RF.npulses.*tissue_multiplier.*(motion.flow_dist/tissue.length));
+%     tissue.vec_long = tissue.vec; % store this for later
+% end
 
 %% print final simulation paramters
 print_sim_info(tissue, RF, motion)
@@ -137,8 +144,6 @@ for puls = 1:RF.npulses
         end
     end
     
-    test(puls) = sliceshift;
-    
     xx =  zzabs + (puls - 1).*RF.pulseshift + sliceshift + motion_resp(puls) + (puls - 1).*motion.flow_per_pulse; % where the pulse IS
     
     zq = find((tissue.vec >= xx(1)) & (tissue.vec <  (zzabs(end) + xx(end)))); % index of these locations in tissue vector
@@ -148,7 +153,7 @@ for puls = 1:RF.npulses
     dat.offset(puls) = xx(1);
     
 end
-imagesc(flipmat)
+figure();imagesc(tissue.vec.*1000-RF.range,1:RF.npulses,rad2deg(flipmat));
 
 flipmat(isnan(flipmat)==1) = 0; % remove nans
 
@@ -184,31 +189,31 @@ else
 end
 
 %% convert to scanner co-ordinates- space in which signals are measured
-tissue.vec = linspace(tissue.min,tissue.length,RF.npulses.*tissue_multiplier);  % redeclare tissue.vec to remove flow extension if it exists
+% tissue.vec = linspace(tissue.min,tissue.length,RF.npulses.*tissue_multiplier);  % redeclare tissue.vec to remove flow extension if it exists
 sliceshift = 0;
 s0 = zeros([RF.npulses,length(tissue.vec)]);
 for puls = 1:RF.npulses
     
-    if ~motion.flow==0
-        xx =  tissue.vec_long + sliceshift - motion_resp(puls) - (puls - 1).*motion.flow_per_pulse;
-    else
+%     if ~motion.flow==0
+%         xx =  tissue.vec_long + sliceshift - motion_resp(puls) - (puls - 1).*motion.flow_per_pulse;
+%     else
         xx =  tissue.vec + sliceshift - motion_resp(puls) - (puls - 1).*motion.flow_per_pulse;
-    end
+%     end
     
     zq = find((tissue.vec >= xx(1)) & (tissue.vec <  xx(end)));% index of these locations in tissue vector
     
     flipvec = interp1(xx,s0_RF(puls,:),tissue.vec(zq),'linear');
     s0(puls,zq) = flipvec;
     
-    if ~motion.flow==0
-        xx_pr =  tissue.vec_long - (puls - 1).*RF.pulseshift - sliceshift - motion_resp(puls) - (puls - 1).*motion.flow_per_pulse; % where the pulse IS
-        zq_pr = find((tissue.vec_long >= xx_pr(1)) & (tissue.vec_long <  xx_pr(end))); % index of these locations in tissue vector
-        qq = linspace(tissue.vec_long(zq_pr(1)),tissue.vec_long(zq_pr(end)),1000);
-    else
+%     if ~motion.flow==0
+%         xx_pr =  tissue.vec_long - (puls - 1).*RF.pulseshift - sliceshift - motion_resp(puls) - (puls - 1).*motion.flow_per_pulse; % where the pulse IS
+%         zq_pr = find((tissue.vec_long >= xx_pr(1)) & (tissue.vec_long <  xx_pr(end))); % index of these locations in tissue vector
+%         qq = linspace(tissue.vec_long(zq_pr(1)),tissue.vec_long(zq_pr(end)),1000);
+%     else
         xx_pr =  tissue.vec - (puls - 1).*RF.pulseshift - sliceshift - motion_resp(puls) - (puls - 1).*motion.flow_per_pulse; % where the pulse IS
         zq_pr = find((tissue.vec >= xx_pr(1)) & (tissue.vec <  xx_pr(end))); % index of these locations in tissue vector
         qq = linspace(tissue.vec(zq_pr(1)),tissue.vec(zq_pr(end)),1000);
-    end
+%     end
     dat.profile(1,:,puls) = qq;
     dat.profile(2,:,puls) = interp1(xx_pr,s0_RF(puls,:),qq,'linear');
     

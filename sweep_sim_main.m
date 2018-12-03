@@ -23,15 +23,15 @@ tissue.T2 = 50; % simulated T2
 
 %% set up RF parameter object
 RF.npulses = 600 ; % number of pulses in simulation
-RF.npe = 0; % number of phase encodes per slice
+RF.npe = 90; % number of phase encodes per slice
 
 % Basic sequence parameters
-RF.seq = 'bssfp'; % phase cycling method string::<'bssfp'> or a double::<angle_in_degrees> phase cycling angle for SPGR
-RF.swp = 0.15; % sweep rate as percentage of slice thickness moved per TR
+RF.seq = 150; % phase cycling method string::<'bssfp'> or a double::<angle_in_degrees> phase cycling angle for SPGR
+RF.swp = 0.0; % sweep rate as percentage of slice thickness moved per TR
 RF.thk = 4.0e-3; % nominal slice thickness
 RF.slicegap = 0.0*1e-3; % slice gap (used if RF.swp == 0)
 
-RF.block=1;
+RF.block=0;
 
 if ischar(RF.seq) % balanced sequence
     RF.TR = 6;
@@ -45,7 +45,7 @@ end
 RF.seqspec = 0; % specify sequence - enabaling this option will override RF.npulses and use RF.npe to simulate a given number of slices and dynamics
 RF.dynorder = 'slices'; % Interleave order of npe encoding ['slices' ; 'dynamics']
 RF.sliceorder = 'odd-even'; % Interleave order of slices ['ascending' ; 'descending' ; 'odd-even' ; 'random']
-RF.ndyn = 3;
+RF.ndyn = 1;
 RF.nslice = 4;
 
 RF.catalysation = []; % vector of catalysation pulses to apply 
@@ -54,7 +54,7 @@ RF.catalysation = []; % vector of catalysation pulses to apply
 %% set up motion paramter object
 motion.flow = 0e-3; % [m/s] blood flow (must be +ve at the moment)
 motion.respfreq = 0.3; % resp frequency in Hz
-motion.respmag = 0e-3; % resp magnitude in mm (note: this is magnitude of motion in the through-plane direction)
+motion.respmag = 2e-3; % resp magnitude in mm (note: this is magnitude of motion in the through-plane direction)
 
 %% Tests
 % loads a mat file with preset RF, tissue and motion settings uncomment the test to run.
@@ -63,9 +63,21 @@ motion.respmag = 0e-3; % resp magnitude in mm (note: this is magnitude of motion
 % load('respiration_test');
 
 %% Other - add loop/intercept individual parameters here to explore any specific setting
-[dat1, tissue1, RF1, motion1] = sweep_sim_EPG_2(tissue, RF, motion);
-RF.block = 0
-[dat2, tissue2, RF2, motion2] = sweep_sim_EPG_2(tissue, RF, motion);
+Rs = linspace(0,1,11);
+for ii = 1:length(Rs)
+    RF.swp = Rs(ii);
+    RF.flip = 70;
+    
+    motion.flow = 0e-3;
+    tissue.T1 = 1820; tissue.T2 = 99;    
+    [dat{ii,1}, tissue, RF, motion] = sweep_sim_EPG_2(tissue, RF, motion); % tissue
+    
+    motion.flow = 40e-3;
+    tissue.T1 = 1550; tissue.T2 = 275;    
+    [dat{ii,2}, tissue, RF, motion] = sweep_sim_EPG_2(tissue, RF, motion); % flow
+
+end
+save('simresults/flowsim.mat','dat')
 
 %% default sim
 [dat, tissue, RF, motion] = sweep_sim_EPG_2(tissue, RF, motion);
