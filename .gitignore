@@ -1,0 +1,10 @@
+#.gitignore#
+
+#matlab files#
+temp_struct.mat
+return_data.mat
+*.asv
+
+#dirs#
+ganymed-ssh2-build250/
+simresults/
