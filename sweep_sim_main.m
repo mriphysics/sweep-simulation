@@ -52,7 +52,7 @@ RF.catalysation = []; % vector of catalysation pulses to apply
 
 
 %% set up motion paramter object
-motion.flow = -40e-3; % [m/s] blood flow (must be +ve at the moment)
+motion.flow = 40e-3; % [m/s] blood flow (must be +ve at the moment)
 motion.respfreq = 0.3; % resp frequency in Hz
 motion.respmag = 0e-3; % resp magnitude in mm (note: this is magnitude of motion in the through-plane direction)
 

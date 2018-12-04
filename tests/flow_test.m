@@ -8,6 +8,8 @@ function [dat, tissue, RF, motion] = flow_test()
 %   dat(:,2) = simulation results for blood flow component
 % 
 
+saveloc = 'simresults/flowsim.mat';
+
 %% set up parameter objects
 load('tests/settings_flow.mat'); % load bulk of simulation parameters
 
@@ -18,8 +20,8 @@ Rf.npulses = 90*5;
 Rs = linspace(0,1,11);
 fs = linspace(-40e-3,40e-3,9); % TODO: run with 5 flowrates
 
-Rs = linspace(0,1,5);
-fs = linspace(-40e-3,40e-3,2); % TODO: run with 5 flowrates
+% Rs = linspace(0,1,2);
+% fs = linspace(-40e-3,40e-3,2); % TODO: run with 5 flowrates
 
 for ii = 1:length(Rs)
     for ff = 1:length(fs)
@@ -37,7 +39,8 @@ for ii = 1:length(Rs)
     end
 end
 
-save('simresults/flowsim.mat','dat','-v7.3')
+disp(['Saving simulation results at ' saveloc])
+save(saveloc,'dat','-v7.3')
 
 
 end
