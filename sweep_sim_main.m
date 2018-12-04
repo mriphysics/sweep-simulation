@@ -27,7 +27,7 @@ RF.npe = 90; % number of phase encodes per slice
 
 % Basic sequence parameters
 RF.seq = 150; % phase cycling method string::<'bssfp'> or a double::<angle_in_degrees> phase cycling angle for SPGR
-RF.swp = 0.0; % sweep rate as percentage of slice thickness moved per TR
+RF.swp = 0.1; % sweep rate as percentage of slice thickness moved per TR
 RF.thk = 4.0e-3; % nominal slice thickness
 RF.slicegap = 0.0*1e-3; % slice gap (used if RF.swp == 0)
 
@@ -74,7 +74,7 @@ for ii = 1:length(Rs)
         tissue.T1 = 1820; tissue.T2 = 99;
         [dat{ii,ff,1}, tissue, RF, motion] = sweep_sim_EPG_2(tissue, RF, motion); % tissue
         
-        motion.flow = fs(ff)
+        motion.flow = fs(ff);
         tissue.T1 = 1550; tissue.T2 = 275;
         [dat{ii,ff,2}, tissue, RF, motion] = sweep_sim_EPG_2(tissue, RF, motion); % flow
     end

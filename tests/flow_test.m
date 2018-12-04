@@ -20,9 +20,6 @@ Rf.npulses = 90*5;
 Rs = linspace(0,1,11);
 fs = linspace(-40e-3,40e-3,9); % TODO: run with 5 flowrates
 
-% Rs = linspace(0,1,2);
-% fs = linspace(-40e-3,40e-3,2); % TODO: run with 5 flowrates
-
 for ii = 1:length(Rs)
     for ff = 1:length(fs)
         RF.swp = Rs(ii);

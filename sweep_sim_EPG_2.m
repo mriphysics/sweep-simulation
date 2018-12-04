@@ -25,7 +25,7 @@ function [dat, tissue, RF, motion] = sweep_sim_EPG_2(tissue, RF, motion)
 %% Hidden options - shouldnt need to be changed in most cases
 % tissue_multiplier = 5; % resolution of tissue vector
 RF.range = 10; % +/-mm to simulate rf pulse over (i.e. extend of sidebands to include)
-
+elements_per_mm = 20; % elements of simulation matrix per mm, can speed things up
 offload = 1; % offload to remote machine if set up
 
 %% calculated values
@@ -66,7 +66,7 @@ tissue.min = min([0,-max(motion_resp),(motion.flow_per_pulse.*RF.npulses)]);
 
 tissue.length = (RF.range*1e-3) + tissue.min + ((RF.thk + RF.slicegap) * RF.nslice) + (RF.pulseshift.*RF.npulses) + (abs(motion.flow_per_pulse).*RF.npulses);
 
-tissue_resolution = (tissue.length*1e3) * 100; % 100 elements per mm
+tissue_resolution = (tissue.length*1e3) * elements_per_mm; % elements per mm
 
 tissue.vec = linspace(tissue.min,tissue.length,tissue_resolution);
 
