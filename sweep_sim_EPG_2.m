@@ -17,7 +17,7 @@ function [dat, tissue, RF, motion] = sweep_sim_EPG_2(tissue, RF, motion)
 %       swp     - sweep rate
 %
 % OUTPUTS::
-%   dat     - return data structure with fields
+%       dat     - return data structure with fields
 %       s0      - signal
 %       flipmat - applied flips (time vs zloc)
 %
@@ -40,6 +40,8 @@ end
 if RF.seqspec == 1
     RF.npulses = RF.npe * RF.ndyn *  RF.nslice;
     warning('RF.npulses is being overridden by RF.seqspec and RF.npe -- npulses is now %d',RF.npulses)
+else
+    RF.nslice = ceil(RF.npulses./RF.npe)+1; % estimated number of slices to make sure enough tissue is simulated
 end
 
 RF.pulseshift = 0.01.*RF.swp.*RF.thk; % pulse shift in m (RF.swp = % slice moved per pulse)
@@ -197,7 +199,7 @@ for puls = 1:RF.npulses
 %     if ~motion.flow==0
 %         xx =  tissue.vec_long + sliceshift - motion_resp(puls) - (puls - 1).*motion.flow_per_pulse;
 %     else
-        xx =  tissue.vec + sliceshift - motion_resp(puls) - (puls - 1).*motion.flow_per_pulse;
+        xx =  tissue.vec + sliceshift - motion_resp(puls) - ((puls - 1).*motion.flow_per_pulse);
 %     end
     
     zq = find((tissue.vec >= xx(1)) & (tissue.vec <  xx(end)));% index of these locations in tissue vector
@@ -214,10 +216,13 @@ for puls = 1:RF.npulses
         zq_pr = find((tissue.vec >= xx_pr(1)) & (tissue.vec <  xx_pr(end))); % index of these locations in tissue vector
         qq = linspace(tissue.vec(zq_pr(1)),tissue.vec(zq_pr(end)),1000);
 %     end
+
     dat.profile(1,:,puls) = qq;
     dat.profile(2,:,puls) = interp1(xx_pr,s0_RF(puls,:),qq,'linear');
     
 end
+
+figure();imagesc(tissue.vec.*1000-RF.range,1:RF.npulses,abs(s0));
 
 s0(isnan(s0)==1) = 0; % remove nans
 

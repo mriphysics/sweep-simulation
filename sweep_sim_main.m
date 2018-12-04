@@ -52,9 +52,9 @@ RF.catalysation = []; % vector of catalysation pulses to apply
 
 
 %% set up motion paramter object
-motion.flow = 0e-3; % [m/s] blood flow (must be +ve at the moment)
+motion.flow = -40e-3; % [m/s] blood flow (must be +ve at the moment)
 motion.respfreq = 0.3; % resp frequency in Hz
-motion.respmag = 2e-3; % resp magnitude in mm (note: this is magnitude of motion in the through-plane direction)
+motion.respmag = 0e-3; % resp magnitude in mm (note: this is magnitude of motion in the through-plane direction)
 
 %% Tests
 % loads a mat file with preset RF, tissue and motion settings uncomment the test to run.
@@ -64,18 +64,20 @@ motion.respmag = 2e-3; % resp magnitude in mm (note: this is magnitude of motion
 
 %% Other - add loop/intercept individual parameters here to explore any specific setting
 Rs = linspace(0,1,11);
+fs = linspace(-40e-3,40e-3,9);
 for ii = 1:length(Rs)
-    RF.swp = Rs(ii);
-    RF.flip = 70;
-    
-    motion.flow = 0e-3;
-    tissue.T1 = 1820; tissue.T2 = 99;    
-    [dat{ii,1}, tissue, RF, motion] = sweep_sim_EPG_2(tissue, RF, motion); % tissue
-    
-    motion.flow = 40e-3;
-    tissue.T1 = 1550; tissue.T2 = 275;    
-    [dat{ii,2}, tissue, RF, motion] = sweep_sim_EPG_2(tissue, RF, motion); % flow
-
+    for ff = 1:length(fs)
+        RF.swp = Rs(ii);
+        RF.flip = 70;
+        
+        motion.flow = 0e-3;
+        tissue.T1 = 1820; tissue.T2 = 99;
+        [dat{ii,ff,1}, tissue, RF, motion] = sweep_sim_EPG_2(tissue, RF, motion); % tissue
+        
+        motion.flow = fs(ff)
+        tissue.T1 = 1550; tissue.T2 = 275;
+        [dat{ii,ff,2}, tissue, RF, motion] = sweep_sim_EPG_2(tissue, RF, motion); % flow
+    end
 end
 save('simresults/flowsim.mat','dat')
 

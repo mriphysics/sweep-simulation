@@ -8,27 +8,36 @@ function [dat, tissue, RF, motion] = flow_test()
 %   dat(:,2) = simulation results for blood flow component
 % 
 
-%% set up tissue parameter object
+%% set up parameter objects
 load('tests/settings_flow.mat'); % load bulk of simulation parameters
 
 if(~exist('simresults','dir')); mkdir simresults; end
-    
-%% sim
-Rs = linspace(0,1,11);
-for ii = 1:length(Rs)
-    RF.swp = Rs(ii);
-    RF.flip = 70;
-    
-    motion.flow = 0e-3;
-    tissue.T1 = 1820; tissue.T2 = 99;    
-    [dat{ii,1}, tissue, RF, motion] = sweep_sim_EPG_2(tissue, RF, motion); % tissue
-    
-    motion.flow = -40e-3;
-    tissue.T1 = 1550; tissue.T2 = 275;    
-    [dat{ii,2}, tissue, RF, motion] = sweep_sim_EPG_2(tissue, RF, motion); % flow
 
+%% sim
+Rf.npulses = 90*5;
+Rs = linspace(0,1,11);
+fs = linspace(-40e-3,40e-3,9); % TODO: run with 5 flowrates
+
+Rs = linspace(0,1,5);
+fs = linspace(-40e-3,40e-3,2); % TODO: run with 5 flowrates
+
+for ii = 1:length(Rs)
+    for ff = 1:length(fs)
+        RF.swp = Rs(ii);
+        RF.flip = 70;
+        
+        motion.flow = 0e-3;
+        tissue.T1 = 1820; tissue.T2 = 99;
+        [dat{ii,ff,1}, tissue, RF, motion] = sweep_sim_EPG_2(tissue, RF, motion); % tissue
+        
+        motion.flow = fs(ff);
+        tissue.T1 = 1550; tissue.T2 = 275;
+        [dat{ii,ff,2}, tissue, RF, motion] = sweep_sim_EPG_2(tissue, RF, motion); % flow
+        close all; % suppress image outputs
+    end
 end
 
-save('simresults/flowsim_negative.mat','dat')
+save('simresults/flowsim.mat','dat','-v7.3')
+
 
 end
