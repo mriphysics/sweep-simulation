@@ -16,9 +16,9 @@ load('tests/settings_flow.mat'); % load bulk of simulation parameters
 if(~exist('simresults','dir')); mkdir simresults; end
 
 %% sim
-Rf.npulses = 90*5;
+RF.npulses = (90*5)-1; % -1 to avoid first pulse of last new slice;
 Rs = linspace(0,1,11);
-fs = linspace(-40e-3,40e-3,9); % TODO: run with 5 flowrates
+fs = linspace(-40e-3,40e-3,9); 
 
 for ii = 1:length(Rs)
     for ff = 1:length(fs)

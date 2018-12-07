@@ -84,7 +84,9 @@ save('simresults/flowsim.mat','dat')
 %% default sim
 [dat, tissue, RF, motion] = sweep_sim_EPG_2(tissue, RF, motion);
 
+
 %% === Results =============================================================================
+close all;
 FontSize1 = 12;
 FontSize2 = 16;
 
