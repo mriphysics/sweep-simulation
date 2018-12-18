@@ -15,6 +15,8 @@ Clone this repo onto your local machine and open 'sweep_sim_main'.
 
 This code uses the EPG-X simulation code described by Malik et al. (2018). A barebones version is included wtihin this repo and full code version can be found [HERE](https://github.com/mriphysics)
 
+OPTIONAL: These simulations can be quite intensive, especially when flow is included. The script uses the parfor function to  parallelise much of the simulation. If you are able to connect to a networked machine with more processing power then you can enable the "offload=1" option in sweep_sim_EPG_2.m to greatly accelerate the simulation. This requires the send2remote function [(available here)](https://github.com/laurencejackson/send2remote). 
+
 ### Installing
 
 Clone the sweep-sim repo onto your local machine
