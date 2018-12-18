@@ -1,7 +1,7 @@
 function [dat, tissue, RF, motion] = flow_test()
 %% Laurence Jackson, BME, KCL, 2018
 % 
-% script to simulate blood flow contrast when using the SWEEP method
+% Script to simulate blood flow contrast when using the SWEEP method
 % 
 % output:
 %   dat(:,1) = simulation results for tissue component
@@ -12,7 +12,6 @@ saveloc = 'simresults/flowsim.mat';
 
 %% set up parameter objects
 load('tests/settings_flow.mat'); % load bulk of simulation parameters
-
 if(~exist('simresults','dir')); mkdir simresults; end
 
 %% sim
