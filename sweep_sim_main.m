@@ -22,7 +22,7 @@ tissue.T1 = 1412; % simulated T1
 tissue.T2 = 50; % simulated T2
 
 %% set up RF parameter object
-RF.npulses = 600 ; % number of pulses in simulation
+RF.npulses = 1600 ; % number of pulses in simulation
 RF.npe = 90; % number of phase encodes per slice
 
 % Basic sequence parameters
@@ -35,7 +35,7 @@ RF.block=0;
 
 if ischar(RF.seq) % balanced sequence
     RF.TR = 6;
-    RF.flip = 22;
+    RF.flip = 21;
 else % non-balanced sequence
     RF.TR = 15;
     RF.flip = 10;
@@ -54,7 +54,7 @@ RF.catalysation = []; % vector of catalysation pulses to apply
 %% set up motion paramter object
 motion.flow = 00e-3; % [m/s] blood flow (must be +ve at the moment)
 motion.respfreq = 0.3; % resp frequency in Hz
-motion.respmag = 0e-3; % resp magnitude in mm (note: this is magnitude of motion in the through-plane direction)
+motion.respmag = 4e-3; % resp magnitude in mm (note: this is magnitude of motion in the through-plane direction)
 
 %% Tests
 % loads a mat file with preset RF, tissue and motion settings uncomment the test to run.

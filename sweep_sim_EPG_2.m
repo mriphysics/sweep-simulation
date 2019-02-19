@@ -50,7 +50,11 @@ RF.flip = rad2deg(max(RF.profile)); % check approximate flip angle
 RF.sweepdur = RF.npulses.*RF.TR*0.001; % sweep duration in seconds
 
 %% calculate motion vectorss
-motion_resp = sin(linspace(0,2*pi*RF.sweepdur*(motion.respfreq),RF.npulses)).*(motion.respmag./2);
+if isfield(motion,'custom')
+   motion_resp = motion.custom;
+else
+    motion_resp = sin(linspace(0,2*pi*RF.sweepdur*(motion.respfreq),RF.npulses)).*(motion.respmag./2);
+end
 
 %% Introduce flow component
 motion.flow_per_pulse = 0;
@@ -60,8 +64,12 @@ if ~motion.flow==0
 end
 
 %% define tissue
+% tissue.min = min([0,max(motion_resp),-1.*(motion.flow_per_pulse.*RF.npulses)]); % flow is negative in this coordinate system
 tissue.min = min([0,-max(motion_resp),-1.*(motion.flow_per_pulse.*RF.npulses)]); % flow is negative in this coordinate system
-tissue.length = (RF.range*1e-3) + tissue.min + ((RF.thk + RF.slicegap) * RF.nslice) + (RF.pulseshift.*RF.npulses) + (abs(motion.flow_per_pulse).*RF.npulses);
+
+% CHECKTHIS: changes tissue.min contribution to tissue.length to abs value
+tissue.length = (RF.range*1e-3) + abs(tissue.min) + ((RF.thk + RF.slicegap) * RF.nslice) + (RF.pulseshift.*RF.npulses) + (abs(motion.flow_per_pulse).*RF.npulses);
+
 tissue_resolution = ceil((abs(tissue.length - tissue.min)*1e3) * elements_per_mm); % elements per mm
 tissue.vec = linspace(tissue.min,tissue.length,tissue_resolution);
 

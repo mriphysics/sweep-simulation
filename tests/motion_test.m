@@ -8,6 +8,8 @@ function [dat, tissue, RF, motion] = motion_test()
 %   dat = simulation results for tissue component
 % 
 
+clear
+
 %% load paramters
 load('tests/settings_motion.mat'); % load bulk of simulation parameters
 
