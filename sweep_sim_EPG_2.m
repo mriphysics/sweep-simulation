@@ -53,8 +53,10 @@ RF.sweepdur = RF.npulses.*RF.TR*0.001; % sweep duration in seconds
 if isfield(motion,'custom')
    motion_resp = motion.custom;
 else
-    motion_resp = sin(linspace(0,2*pi*RF.sweepdur*(motion.respfreq),RF.npulses)).*(motion.respmag./2);
+   motion_resp = sin(linspace(0,2*pi*RF.sweepdur*(motion.respfreq),RF.npulses)).*(motion.respmag./2);
 end
+
+motion.motion_resp = motion_resp;
 
 %% Introduce flow component
 motion.flow_per_pulse = 0;
@@ -68,6 +70,7 @@ end
 tissue.min = min([0,-max(motion_resp),-1.*(motion.flow_per_pulse.*RF.npulses)]); % flow is negative in this coordinate system
 
 % CHECKTHIS: changes tissue.min contribution to tissue.length to abs value
+% tissue.length = (RF.range*1e-3) + (tissue.min) + ((RF.thk + RF.slicegap) * RF.nslice) + (RF.pulseshift.*RF.npulses) + (abs(motion.flow_per_pulse).*RF.npulses);
 tissue.length = (RF.range*1e-3) + abs(tissue.min) + ((RF.thk + RF.slicegap) * RF.nslice) + (RF.pulseshift.*RF.npulses) + (abs(motion.flow_per_pulse).*RF.npulses);
 
 tissue_resolution = ceil((abs(tissue.length - tissue.min)*1e3) * elements_per_mm); % elements per mm
@@ -214,9 +217,11 @@ for puls = 1:RF.npulses
     %         zq_pr = find((tissue.vec_long >= xx_pr(1)) & (tissue.vec_long <  xx_pr(end))); % index of these locations in tissue vector
     %         qq = linspace(tissue.vec_long(zq_pr(1)),tissue.vec_long(zq_pr(end)),1000);
     %     else
+    
     xx_pr =  tissue.vec - (puls - 1).*RF.pulseshift - sliceshift - motion_resp(puls) + (puls - 1).*motion.flow_per_pulse; % where the pulse IS
     zq_pr = find((tissue.vec >= xx_pr(1)) & (tissue.vec <  xx_pr(end))); % index of these locations in tissue vector
     qq = linspace(tissue.vec(zq_pr(1)),tissue.vec(zq_pr(end)),1000);
+    
     %     end
     
     dat.profile(1,:,puls) = qq;

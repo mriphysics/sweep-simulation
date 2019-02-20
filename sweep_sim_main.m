@@ -23,10 +23,10 @@ tissue.T2 = 50; % simulated T2
 
 %% set up RF parameter object
 RF.npulses = 1600 ; % number of pulses in simulation
-RF.npe = 90; % number of phase encodes per slice
+RF.npe = 90e9; % number of phase encodes per slice
 
 % Basic sequence parameters
-RF.seq = 150; % phase cycling method string::<'bssfp'> or a double::<angle_in_degrees> phase cycling angle for SPGR
+RF.seq = 'bssfp'; % phase cycling method string::<'bssfp'> or a double::<angle_in_degrees> phase cycling angle for SPGR
 RF.swp = 0.1; % sweep rate as percentage of slice thickness moved per TR
 RF.thk = 4.0e-3; % nominal slice thickness
 RF.slicegap = 0.0*1e-3; % slice gap (used if RF.swp == 0)
@@ -49,7 +49,6 @@ RF.ndyn = 1;
 RF.nslice = 4;
 
 RF.catalysation = []; % vector of catalysation pulses to apply 
-
 
 %% set up motion paramter object
 motion.flow = 00e-3; % [m/s] blood flow (must be +ve at the moment)
