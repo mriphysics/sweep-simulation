@@ -35,14 +35,25 @@ for ii = 1:nskips
 end
 plot(motion.custom)
 
- RF.seq = 'bssfp';
+RF.seq = 'bssfp';
 for ii = 1:length(Rs)
     
     RF.swp = Rs(ii);
     [dat{ii}, tissue, RF, motion] = sweep_sim_EPG_2(tissue, RF, motion); % bffe
 
 end
-
 save('simresults/motionsim_nonperiodic_bffe.mat','dat','-v7.3')
+
+RF.seq = 150;
+RF.TR = 15;
+RF.flip = 10;
+for ii = 1:length(Rs)
+    
+    RF.swp = Rs(ii);
+    [dat{ii}, tissue, RF, motion] = sweep_sim_EPG_2(tissue, RF, motion); % bffe
+
+end
+save('simresults/motionsim_nonperiodic_spgr.mat','dat','-v7.3')
+
 
 end

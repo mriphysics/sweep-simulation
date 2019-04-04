@@ -42,11 +42,19 @@ RF.pulseshift = 0.01.*RF.swp.*RF.thk; % pulse shift in m (RF.swp = % slice moved
 if RF.seqspec == 1
     RF.npulses = RF.npe * RF.ndyn *  RF.nslice;
     warning('RF.npulses is being overridden by RF.seqspec and RF.npe -- npulses is now %d',RF.npulses)
+    
+    if (RF.match_swp == 1)
+        % match sweep rate to seqspec
+        RF.pulseshift = ((RF.nslice) * (RF.thk + RF.slicegap)) / RF.npulses;
+        RF.swp = (RF.pulseshift * 100) / (RF.thk);
+        warning('RF.swp is being overridden by RF.seqspec -- RF.swp is now %d', RF.swp)
+    end
+    
 elseif RF.pulseshift == 0
     RF.nslice = ceil(RF.npulses./RF.npe); % estimated number of slices to make sure enough tissue is simulated
 end
 
-RF.flip = rad2deg(max(RF.profile)); % check approximate flip angle
+RF.flip = rad2deg(max(RF.profile)); % approximate flip angle
 RF.sweepdur = RF.npulses.*RF.TR*0.001; % sweep duration in seconds
 
 %% calculate motion vectorss
@@ -71,7 +79,7 @@ tissue.min = min([0,-max(motion_resp),-1.*(motion.flow_per_pulse.*RF.npulses)]);
 
 % CHECKTHIS: changes tissue.min contribution to tissue.length to abs value
 % tissue.length = (RF.range*1e-3) + (tissue.min) + ((RF.thk + RF.slicegap) * RF.nslice) + (RF.pulseshift.*RF.npulses) + (abs(motion.flow_per_pulse).*RF.npulses);
-tissue.length = (RF.range*1e-3) + abs(tissue.min) + ((RF.thk + RF.slicegap) * RF.nslice) + (RF.pulseshift.*RF.npulses) + (abs(motion.flow_per_pulse).*RF.npulses);
+tissue.length = (2*RF.range*1e-3) + abs(tissue.min) + ((RF.thk + RF.slicegap) * (RF.nslice-1)) + (RF.pulseshift.*RF.npulses) + (abs(motion.flow_per_pulse).*RF.npulses);
 
 tissue_resolution = ceil((abs(tissue.length - tissue.min)*1e3) * elements_per_mm); % elements per mm
 tissue.vec = linspace(tissue.min,tissue.length,tissue_resolution);
@@ -182,7 +190,7 @@ if offload == 1
     SS.phi = phi;
     SS.RF = RF;
     SS.tissue = tissue;
-    s0_RF = send2remote('EPG_sim_offload',SS,'ssh','ssh_gpubeastie01-pc.mat');
+    s0_RF = send2remote('EPG_sim_offload',SS,'ssh','ssh_beastie01.mat');
     delete('temp_struct.mat')
 else
     parfor zz = 1:size(flipmat,2)
@@ -201,31 +209,27 @@ tissue.scanner_space = linspace(coverage_min, coverage_max, tissue_resolution); 
 sliceshift = 0;
 s0 = zeros([RF.npulses,length(tissue.vec)]);
 for puls = 1:RF.npulses
-    
-    %     xx =  tissue.vec + sliceshift - motion_resp(puls) - (-1.*(puls - 1).*motion.flow_per_pulse);
-    %     zq = find((tissue.vec >= xx(1)) & (tissue.vec <  xx(end))); % index of these locations in tissue vector
-    %     flipvec = interp1(xx,s0_RF(puls,:),tissue.vec(zq),'linear');
-    
+
     xx =  tissue.vec + sliceshift - motion_resp(puls) + (puls - 1).*motion.flow_per_pulse - (RF.range*1e-3);
     zq = find((tissue.scanner_space >= xx(1)) & (tissue.scanner_space <  xx(end))); % index of these locations in tissue vector
     flipvec = interp1(xx,s0_RF(puls,:),tissue.scanner_space(zq),'linear');
     
     s0(puls,zq) = flipvec;
+
+    if RF.swp == 0
+        xx_pr =  tissue.vec - (1e-3 * RF.range) - ((RF.thk + RF.slicegap) * floor(puls/RF.npe)) - sliceshift - motion_resp(puls) + (puls - 1).*motion.flow_per_pulse; % where the pulse IS
+    else
+        xx_pr =  tissue.vec - (1e-3 * RF.range) - (puls - 1).*RF.pulseshift - sliceshift - motion_resp(puls) + (puls - 1).*motion.flow_per_pulse; % where the pulse IS
+    end
     
-    %     if ~motion.flow==0
-    %         xx_pr =  tissue.vec_long - (puls - 1).*RF.pulseshift - sliceshift - motion_resp(puls) - (puls - 1).*motion.flow_per_pulse; % where the pulse IS
-    %         zq_pr = find((tissue.vec_long >= xx_pr(1)) & (tissue.vec_long <  xx_pr(end))); % index of these locations in tissue vector
-    %         qq = linspace(tissue.vec_long(zq_pr(1)),tissue.vec_long(zq_pr(end)),1000);
-    %     else
-    
-    xx_pr =  tissue.vec - (puls - 1).*RF.pulseshift - sliceshift - motion_resp(puls) + (puls - 1).*motion.flow_per_pulse; % where the pulse IS
     zq_pr = find((tissue.vec >= xx_pr(1)) & (tissue.vec <  xx_pr(end))); % index of these locations in tissue vector
     qq = linspace(tissue.vec(zq_pr(1)),tissue.vec(zq_pr(end)),1000);
     
-    %     end
+    dat.profile(1,:,puls) = qq; % z location
+    dat.profile(2,:,puls) = interp1(xx_pr,s0_RF(puls,:),qq,'linear'); % amplitude
     
-    dat.profile(1,:,puls) = qq;
-    dat.profile(2,:,puls) = interp1(xx_pr,s0_RF(puls,:),qq,'linear');
+    dat.profile_common(1,:,puls) = linspace(-RF.range*1e-3, RF.range*1e-3, 1000);
+    dat.profile_common(2,:,puls) = interp1(xx_pr,s0_RF(puls,:),dat.profile_common(1,:,puls),'linear'); % amplitude
     
 end
 
