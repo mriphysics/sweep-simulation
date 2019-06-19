@@ -1,6 +1,6 @@
 # Sweep sim code
 
-This matlab code is for simulating the MRI signal produced in gradient echo MRI using an EPG simulation framework. This code is described in the follwing papers, if you find this code useful please reference this work. 
+This matlab code is for simulating the MRI signal produced in gradient echo MRI using an EPG simulation framework. This code is described in the following papers, if you find this code useful please reference this work. 
 
 > Jackson, LH, Price, AN, Hutter, J et al. Respiration resolved imaging with continuous stable state 2D acquisition using linear frequency SWEEP. Magn Reson Med. 2019; 00: 1– 15. https://doi.org/10.1002/mrm.27834 
 
