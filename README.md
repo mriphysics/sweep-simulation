@@ -1,11 +1,9 @@
 # Sweep sim code
 
-This matlab code is for simulating the MRI signal produced in gradient echo MRI using an EPG simulation framework.
+This matlab code is for simulating the MRI signal produced in gradient echo MRI using an EPG simulation framework. This code is described in the follwing papers, if you find this code useful please reference this work. 
 
-If you find this code useful please use the following citations
-
-1. Jackson, L. H., Price, A. N., Hutter, J., Cordero-grande, L., Ho, A., Slator, P, J., Dos Santo, A., Van Amerom, J. F. P., Murgasova, M., Mccabe, L.,Rutherford, M. A., V Hajnal, J.V., 2018. Respiration resolved imaging using continuous steady state multiband excitation with linear frequency sweeps. In:ISMRM, pp. 5–7.
-2. Malik, Shaihan J., Rui Pedro AG Teixeira, and Joseph V. Hajnal. "Extended phase graph formalism for systems with magnetization transfer and exchange." Magnetic resonance in medicine 80.2 (2018): 767-779.
+> Jackson, LH, Price, AN, Hutter, J et al. Respiration resolved imaging with continuous stable state 2D acquisition using linear frequency SWEEP. Magn Reson Med. 2019; 00: 1– 15. https://doi.org/10.1002/mrm.27834 
+> Malik, S. J., Teixeira, R. P. and Hajnal, J. V. Extended phase graph formalism for systems with magnetization transfer and exchange. Magn. Reson. Med. 2018; 80: 767-779. doi:10.1002/mrm.27040
 
 ## Getting Started
 
