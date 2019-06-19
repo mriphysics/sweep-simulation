@@ -3,6 +3,7 @@
 This matlab code is for simulating the MRI signal produced in gradient echo MRI using an EPG simulation framework. This code is described in the follwing papers, if you find this code useful please reference this work. 
 
 > Jackson, LH, Price, AN, Hutter, J et al. Respiration resolved imaging with continuous stable state 2D acquisition using linear frequency SWEEP. Magn Reson Med. 2019; 00: 1– 15. https://doi.org/10.1002/mrm.27834 
+
 > Malik, S. J., Teixeira, R. P. and Hajnal, J. V. Extended phase graph formalism for systems with magnetization transfer and exchange. Magn. Reson. Med. 2018; 80: 767-779. doi:10.1002/mrm.27040
 
 ## Getting Started
